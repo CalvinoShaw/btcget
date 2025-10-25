@@ -17,7 +17,7 @@ import {
   saveSettings,
   mergeArticles,
 } from '../utils/storage';
-import Parser from 'rss-parser';
+import { fetchRSS as fetchRSSUtil } from '../utils/rssParser';
 
 interface AppState {
   // Data
@@ -61,25 +61,8 @@ interface AppState {
   initialize: () => void;
 }
 
-const parser = new Parser({
-  customFields: {
-    item: ['content:encoded', 'content'],
-  },
-});
-
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
-function generateArticleId(link: string, pubDate: string): string {
-  const str = `${link}-${pubDate}`;
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return `article-${Math.abs(hash)}`;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -160,34 +143,12 @@ export const useStore = create<AppState>((set, get) => ({
 
     set({ isLoading: true });
 
-    try {
-      // Use CORS proxy
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(source.url)}`;
-      const response = await fetch(proxyUrl);
+    const existingArticles = get().articles;
+    const result = await fetchRSSUtil(source, existingArticles);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      const feed = await parser.parseString(data.contents);
-
-      const newArticles: Article[] = feed.items.map((item) => ({
-        id: generateArticleId(item.link || '', item.pubDate || ''),
-        sourceId: source.id,
-        title: item.title || 'Untitled',
-        content: item['content:encoded'] || item.content || item.contentSnippet || '',
-        contentSnippet: item.contentSnippet || '',
-        pubDate: item.pubDate || new Date().toISOString(),
-        link: item.link || '',
-        creator: item.creator,
-        categories: item.categories,
-        isRead: false,
-      }));
-
+    if (result.success) {
       // Merge with existing articles
-      const existingArticles = get().articles;
-      const mergedArticles = mergeArticles(existingArticles, newArticles);
+      const mergedArticles = mergeArticles(existingArticles, result.articles);
 
       set({ articles: mergedArticles, isLoading: false });
       saveArticles(mergedArticles);
@@ -198,30 +159,21 @@ export const useStore = create<AppState>((set, get) => ({
         status: 'active',
         errorMessage: undefined,
       });
-
-      return {
-        success: true,
-        sourceId,
-        articlesCount: newArticles.length,
-      };
-    } catch (error) {
+    } else {
       set({ isLoading: false });
-
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
 
       get().updateSource(sourceId, {
         status: 'error',
-        errorMessage,
+        errorMessage: result.error,
       });
-
-      return {
-        success: false,
-        sourceId,
-        articlesCount: 0,
-        error: errorMessage,
-      };
     }
+
+    return {
+      success: result.success,
+      sourceId: result.sourceId,
+      articlesCount: result.articlesCount,
+      error: result.error,
+    };
   },
 
   fetchAllSources: async () => {
