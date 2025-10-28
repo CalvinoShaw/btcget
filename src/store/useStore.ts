@@ -28,7 +28,7 @@ interface AppState {
 
   // UI State
   isLoading: boolean;
-  currentView: 'sources' | 'topics' | 'articles' | 'analysis';
+  currentView: 'sources' | 'topics' | 'articles' | 'analysis' | 'settings';
   selectedSourceId: string | null;
   selectedTopicId: string | null;
 
@@ -77,7 +77,7 @@ export const useStore = create<AppState>((set, get) => ({
     defaultTimeRange: 7,
   },
   isLoading: false,
-  currentView: 'sources',
+  currentView: 'articles',
   selectedSourceId: null,
   selectedTopicId: null,
 

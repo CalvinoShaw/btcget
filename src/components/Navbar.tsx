@@ -1,5 +1,5 @@
 import { useStore } from '../store/useStore';
-import { RefreshCw, Rss, FileText, BarChart3, Folder } from 'lucide-react';
+import { RefreshCw, Rss, FileText, BarChart3, Folder, Settings } from 'lucide-react';
 
 export default function Navbar() {
   const { currentView, setCurrentView, fetchAllSources, isLoading, sources } =
@@ -21,10 +21,11 @@ export default function Navbar() {
   };
 
   const navItems = [
+    { id: 'articles' as const, label: '文章列表', icon: FileText },
     { id: 'sources' as const, label: 'RSS源管理', icon: Rss },
     { id: 'topics' as const, label: '专题管理', icon: Folder },
-    { id: 'articles' as const, label: '文章列表', icon: FileText },
     { id: 'analysis' as const, label: '分析报告', icon: BarChart3 },
+    { id: 'settings' as const, label: '设置', icon: Settings },
   ];
 
   return (

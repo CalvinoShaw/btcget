@@ -5,6 +5,7 @@ import SourcesPage from './pages/SourcesPage';
 import TopicsPage from './pages/TopicsPage';
 import ArticlesPage from './pages/ArticlesPage';
 import AnalysisPage from './pages/AnalysisPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const { currentView, initialize } = useStore();
@@ -21,6 +22,7 @@ function App() {
         {currentView === 'topics' && <TopicsPage />}
         {currentView === 'articles' && <ArticlesPage />}
         {currentView === 'analysis' && <AnalysisPage />}
+        {currentView === 'settings' && <SettingsPage />}
       </main>
     </div>
   );
