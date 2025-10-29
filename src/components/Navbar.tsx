@@ -58,16 +58,24 @@ export default function Navbar() {
             </div>
           </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw
-              className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
-            />
-            {isLoading ? '采集中...' : '刷新全部'}
-          </button>
+          <div className="flex items-center space-x-3">
+            {isLoading && (
+              <span className="text-sm text-gray-600 flex items-center">
+                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                后台更新中...
+              </span>
+            )}
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+              />
+              {isLoading ? '采集中' : '刷新'}
+            </button>
+          </div>
         </div>
       </div>
     </nav>

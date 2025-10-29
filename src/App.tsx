@@ -8,11 +8,25 @@ import AnalysisPage from './pages/AnalysisPage';
 import SettingsPage from './pages/SettingsPage';
 
 function App() {
-  const { currentView, initialize } = useStore();
+  const { currentView, initialize, fetchAllSources } = useStore();
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    // 初始化并自动刷新
+    const initAndRefresh = async () => {
+      initialize();
+
+      // 等待一小段时间让初始化完成
+      setTimeout(async () => {
+        const currentSources = useStore.getState().sources;
+        if (currentSources.length > 0) {
+          // 静默刷新，在后台更新文章
+          await fetchAllSources();
+        }
+      }, 500);
+    };
+
+    initAndRefresh();
+  }, [initialize, fetchAllSources]);
 
   return (
     <div className="min-h-screen bg-gray-50">
