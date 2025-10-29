@@ -83,9 +83,9 @@ export default function ArticlesPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 7rem)' }}>
       {/* Header */}
-      <div className="mb-4">
+      <div className="flex-shrink-0 py-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-900">文章列表</h2>
           <span className="text-sm text-gray-600">
@@ -148,8 +148,8 @@ export default function ArticlesPage() {
       </div>
 
       {/* Main Content - Sidebar Layout */}
-      <div className="flex gap-4 h-[calc(100%-12rem)] overflow-hidden">
-        {/* Left: Articles List (1/4 width) */}
+      <div className="flex-1 flex gap-4 min-h-0">
+        {/* Left: Articles List (full width on mobile, 1/4 on desktop) */}
         <div className="w-full lg:w-1/4 bg-white rounded-lg shadow-sm border overflow-y-auto">
           {filteredArticles.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
@@ -228,7 +228,7 @@ export default function ArticlesPage() {
         </div>
 
         {/* Right: Article Detail (3/4 width) */}
-        <div className="hidden lg:block flex-1 bg-white rounded-lg shadow-sm border overflow-hidden">
+        <div className="hidden lg:block lg:w-3/4 bg-white rounded-lg shadow-sm border overflow-hidden">
           {selectedArticle ? (
             <div className="h-full flex flex-col">
               {/* Detail Header */}
