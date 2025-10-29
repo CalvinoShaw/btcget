@@ -149,8 +149,8 @@ export default function ArticlesPage() {
 
       {/* Main Content - Sidebar Layout */}
       <div className="flex-1 flex gap-4 min-h-0">
-        {/* Left: Articles List (full width on mobile, 1/4 on desktop) */}
-        <div className="w-full lg:w-1/4 bg-white rounded-lg shadow-sm border overflow-y-auto">
+        {/* Desktop: Left Articles List (1/4 width) */}
+        <div className="hidden lg:block w-1/4 bg-white rounded-lg shadow-sm border overflow-y-auto flex-shrink-0">
           {filteredArticles.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -227,8 +227,84 @@ export default function ArticlesPage() {
           )}
         </div>
 
-        {/* Right: Article Detail (3/4 width) */}
-        <div className="hidden lg:block lg:w-3/4 bg-white rounded-lg shadow-sm border overflow-hidden">
+        {/* Mobile: Articles List (full width) */}
+        <div className="lg:hidden w-full bg-white rounded-lg shadow-sm border overflow-y-auto">
+          {filteredArticles.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>暂无文章</p>
+              <p className="text-sm mt-2">
+                请先在"RSS源管理"中采集文章，或调整过滤条件
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {displayedArticles.map((article) => (
+                <div
+                  key={article.id}
+                  onClick={() => handleSelectArticle(article)}
+                  className={`p-4 cursor-pointer transition-colors ${
+                    article.isRead ? 'opacity-70' : ''
+                  } hover:bg-gray-50`}
+                >
+                  {/* 标题 */}
+                  <h3 className="font-semibold text-gray-900 mb-2 text-sm leading-tight">
+                    {article.title}
+                  </h3>
+
+                  {/* 源名称 */}
+                  <div className="mb-2">
+                    <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
+                      {getSourceName(article.sourceId)}
+                    </span>
+                  </div>
+
+                  {/* 更新时间 */}
+                  <div className="flex items-center text-xs text-gray-500 mb-2">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {formatDistanceToNow(new Date(article.pubDate), {
+                      addSuffix: true,
+                      locale: zhCN,
+                    })}
+                  </div>
+
+                  {/* 内容简介 */}
+                  {article.contentSnippet && (
+                    <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
+                      {article.contentSnippet}
+                    </p>
+                  )}
+
+                  {/* 已读标记 */}
+                  {article.isRead && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center text-xs text-blue-600">
+                        <Eye className="w-3 h-3 mr-1" />
+                        已读
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Load more trigger */}
+              {hasMore && (
+                <div ref={loadMoreRef} className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                </div>
+              )}
+
+              {!hasMore && displayedArticles.length > 0 && (
+                <div className="text-center py-4 text-gray-400 text-xs">
+                  已显示全部文章
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop: Right Article Detail (3/4 width) */}
+        <div className="hidden lg:block w-3/4 bg-white rounded-lg shadow-sm border overflow-hidden flex-shrink-0">
           {selectedArticle ? (
             <div className="h-full flex flex-col">
               {/* Detail Header */}
