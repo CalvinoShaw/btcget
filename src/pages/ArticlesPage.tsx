@@ -20,7 +20,6 @@ export default function ArticlesPage() {
   const filteredArticles = useMemo(() => {
     let filtered = [...articles];
 
-    // Filter by topic
     if (selectedTopicId !== 'all') {
       const topic = topics.find((t) => t.id === selectedTopicId);
       if (topic) {
@@ -28,12 +27,10 @@ export default function ArticlesPage() {
       }
     }
 
-    // Filter by source
     if (selectedSourceId !== 'all') {
       filtered = filtered.filter((a) => a.sourceId === selectedSourceId);
     }
 
-    // Filter by read status
     if (showReadOnly) {
       filtered = filtered.filter((a) => a.isRead);
     }
@@ -41,13 +38,11 @@ export default function ArticlesPage() {
     return sortArticlesByDate(filtered, 'desc');
   }, [articles, selectedTopicId, selectedSourceId, showReadOnly, topics]);
 
-  // Reset display count when filters change
   useEffect(() => {
     setDisplayCount(ARTICLES_PER_PAGE);
     setSelectedArticle(null);
   }, [selectedTopicId, selectedSourceId, showReadOnly]);
 
-  // Infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -154,8 +149,8 @@ export default function ArticlesPage() {
 
       {/* Main Content - Sidebar Layout */}
       <div className="flex gap-4 h-[calc(100%-12rem)] overflow-hidden">
-        {/* Left: Articles List */}
-        <div className="w-full lg:w-2/5 bg-white rounded-lg shadow-sm border overflow-y-auto">
+        {/* Left: Articles List (1/4 width) */}
+        <div className="w-full lg:w-1/4 bg-white rounded-lg shadow-sm border overflow-y-auto">
           {filteredArticles.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -174,32 +169,45 @@ export default function ArticlesPage() {
                     selectedArticle?.id === article.id
                       ? 'bg-blue-50 border-l-4 border-l-blue-600'
                       : 'hover:bg-gray-50'
-                  } ${article.isRead ? 'opacity-60' : ''}`}
+                  } ${article.isRead ? 'opacity-70' : ''}`}
                 >
-                  <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
+                  {/* 标题 */}
+                  <h3 className="font-semibold text-gray-900 mb-2 text-sm leading-tight">
                     {article.title}
                   </h3>
 
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                    <span className="flex items-center">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {formatDistanceToNow(new Date(article.pubDate), {
-                        addSuffix: true,
-                        locale: zhCN,
-                      })}
-                    </span>
-
-                    <span className="px-2 py-0.5 bg-gray-100 rounded">
+                  {/* 源名称 */}
+                  <div className="mb-2">
+                    <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
                       {getSourceName(article.sourceId)}
                     </span>
+                  </div>
 
-                    {article.isRead && (
-                      <span className="flex items-center text-blue-600">
+                  {/* 更新时间 */}
+                  <div className="flex items-center text-xs text-gray-500 mb-2">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    {formatDistanceToNow(new Date(article.pubDate), {
+                      addSuffix: true,
+                      locale: zhCN,
+                    })}
+                  </div>
+
+                  {/* 内容简介 */}
+                  {article.contentSnippet && (
+                    <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
+                      {article.contentSnippet}
+                    </p>
+                  )}
+
+                  {/* 已读标记 */}
+                  {article.isRead && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center text-xs text-blue-600">
                         <Eye className="w-3 h-3 mr-1" />
                         已读
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
 
@@ -211,7 +219,7 @@ export default function ArticlesPage() {
               )}
 
               {!hasMore && displayedArticles.length > 0 && (
-                <div className="text-center py-4 text-gray-400 text-sm">
+                <div className="text-center py-4 text-gray-400 text-xs">
                   已显示全部文章
                 </div>
               )}
@@ -219,42 +227,44 @@ export default function ArticlesPage() {
           )}
         </div>
 
-        {/* Right: Article Detail */}
+        {/* Right: Article Detail (3/4 width) */}
         <div className="hidden lg:block flex-1 bg-white rounded-lg shadow-sm border overflow-hidden">
           {selectedArticle ? (
             <div className="h-full flex flex-col">
               {/* Detail Header */}
-              <div className="p-6 border-b">
+              <div className="p-6 border-b bg-gray-50">
                 <div className="flex items-start justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900 flex-1 pr-4">
+                  <h1 className="text-3xl font-bold text-gray-900 flex-1 pr-4 leading-tight">
                     {selectedArticle.title}
-                  </h2>
+                  </h1>
                   <button
                     onClick={() => setSelectedArticle(null)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 flex-shrink-0"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-4">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
                   <span className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    {format(new Date(selectedArticle.pubDate), 'yyyy-MM-dd HH:mm')}
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {format(new Date(selectedArticle.pubDate), 'yyyy年MM月dd日 HH:mm')}
                   </span>
 
-                  <span className="px-2 py-1 bg-gray-100 rounded">
-                    {getSourceName(selectedArticle.sourceId)}
+                  <span className="px-3 py-1 bg-white border border-gray-200 rounded-full">
+                    来源：{getSourceName(selectedArticle.sourceId)}
                   </span>
 
                   {selectedArticle.creator && (
-                    <span>作者: {selectedArticle.creator}</span>
+                    <span className="px-3 py-1 bg-white border border-gray-200 rounded-full">
+                      作者：{selectedArticle.creator}
+                    </span>
                   )}
                 </div>
 
                 <button
                   onClick={() => handleOpenOriginal(selectedArticle.link)}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   查看原文
@@ -262,11 +272,11 @@ export default function ArticlesPage() {
               </div>
 
               {/* Detail Content */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-8 bg-white">
                 <div
                   className="prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{
-                    __html: selectedArticle.content || selectedArticle.contentSnippet || '暂无内容',
+                    __html: selectedArticle.content || selectedArticle.contentSnippet || '<p class="text-gray-500">暂无内容</p>',
                   }}
                 />
               </div>
@@ -274,8 +284,9 @@ export default function ArticlesPage() {
           ) : (
             <div className="h-full flex items-center justify-center text-gray-400">
               <div className="text-center">
-                <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>选择一篇文章查看详情</p>
+                <FileText className="w-20 h-20 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium">选择一篇文章查看详情</p>
+                <p className="text-sm mt-2">点击左侧列表中的任意文章</p>
               </div>
             </div>
           )}
@@ -285,7 +296,7 @@ export default function ArticlesPage() {
       {/* Mobile: Full Screen Article Detail */}
       {selectedArticle && (
         <div className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between">
+          <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between shadow-sm">
             <button
               onClick={() => setSelectedArticle(null)}
               className="text-gray-600 hover:text-gray-900"
@@ -301,18 +312,18 @@ export default function ArticlesPage() {
             </button>
           </div>
 
-          <div className="p-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
               {selectedArticle.title}
-            </h2>
+            </h1>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 mb-6">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 mb-6 pb-6 border-b">
               <span className="flex items-center">
                 <Calendar className="w-3 h-3 mr-1" />
                 {format(new Date(selectedArticle.pubDate), 'yyyy-MM-dd HH:mm')}
               </span>
 
-              <span className="px-2 py-0.5 bg-gray-100 rounded">
+              <span className="px-2 py-1 bg-gray-100 rounded">
                 {getSourceName(selectedArticle.sourceId)}
               </span>
 
@@ -324,7 +335,7 @@ export default function ArticlesPage() {
             <div
               className="prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{
-                __html: selectedArticle.content || selectedArticle.contentSnippet || '暂无内容',
+                __html: selectedArticle.content || selectedArticle.contentSnippet || '<p class="text-gray-500">暂无内容</p>',
               }}
             />
           </div>
