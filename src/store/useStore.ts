@@ -18,6 +18,7 @@ import {
   mergeArticles,
 } from '../utils/storage';
 import { fetchRSS as fetchRSSUtil } from '../utils/rssParser';
+import { notifyNewArticles, notifyBatchUpdate } from '../utils/pushDeer';
 
 interface AppState {
   // Data
@@ -159,6 +160,16 @@ export const useStore = create<AppState>((set, get) => ({
         status: 'active',
         errorMessage: undefined,
       });
+
+      // Send PushDeer notification for new articles
+      const pushDeerConfig = get().settings.pushDeer;
+      if (pushDeerConfig && result.articles.length > 0) {
+        notifyNewArticles(pushDeerConfig, result.articles, source.name).catch(
+          (error) => {
+            console.error('PushDeer通知失败:', error);
+          }
+        );
+      }
     } else {
       set({ isLoading: false });
 
@@ -193,6 +204,38 @@ export const useStore = create<AppState>((set, get) => ({
     }
 
     set({ isLoading: false });
+
+    // Send batch update notification
+    const pushDeerConfig = get().settings.pushDeer;
+    if (pushDeerConfig) {
+      const totalArticles = results.reduce(
+        (sum, r) => sum + r.articlesCount,
+        0
+      );
+      const successCount = results.filter((r) => r.success).length;
+      const failCount = results.filter((r) => !r.success).length;
+      const sourcesInfo = results
+        .filter((r) => r.success && r.articlesCount > 0)
+        .map((r) => {
+          const source = sources.find((s) => s.id === r.sourceId);
+          return {
+            name: source?.name || '未知来源',
+            count: r.articlesCount,
+          };
+        });
+
+      if (totalArticles > 0) {
+        notifyBatchUpdate(pushDeerConfig, {
+          totalArticles,
+          successCount,
+          failCount,
+          sources: sourcesInfo,
+        }).catch((error) => {
+          console.error('PushDeer批量通知失败:', error);
+        });
+      }
+    }
+
     return results;
   },
 

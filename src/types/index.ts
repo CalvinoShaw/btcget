@@ -71,6 +71,17 @@ export interface AppSettings {
   autoRefreshInterval?: number;
   articlesPerPage?: number;
   defaultTimeRange?: number; // days
+  pushDeer?: PushDeerConfig;
+}
+
+// PushDeer Configuration
+export interface PushDeerConfig {
+  enabled: boolean;
+  serverUrl: string; // 自架服务器地址
+  pushKey: string; // 推送密钥
+  notifyOnNewArticles: boolean; // 新文章时推送
+  notifyOnlyUnread: boolean; // 仅未读文章
+  minArticlesForNotify?: number; // 最少文章数才推送
 }
 
 // API Response Types
